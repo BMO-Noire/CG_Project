@@ -1,425 +1,883 @@
-﻿#pragma warning(disable : 4996)
-
-#include "pch.h"
-#include <random>
-#include <stdlib.h>
-#include <stdio.h>
-#include <corecrt_wtime.h>
+﻿#include "pch.h"
 #include "robot.h"
 
-char* filetobuf(const char* file)
+
+extern void set_color(float, float, float, float);
+
+
+
+Box::Box()
 {
-	FILE* fptr;
-	long length;
-	char* buf;
-	fptr = fopen(file, "rb"); // Open file for reading
-	if (!fptr) // Return NULL on failure
-		return NULL;
-	fseek(fptr, 0, SEEK_END); // Seek to the end of the file
-	length = ftell(fptr); // Find out how many bytes into the file we are
-	buf = (char*)malloc(length + 1); // Allocate a buffer for the entire length of the file and a null terminator
-	fseek(fptr, 0, SEEK_SET); // Go back to the beginning of the file
-	fread(buf, length, 1, fptr); // Read the contents of the file in to the buffer
-	fclose(fptr); // Close the file
-	buf[length] = 0; // Null terminator
-	return buf; // Return the buffer
+	vao = 0;
+
+	float x = 0.5, y = .1f, z = .3f;
+	float vPositionList[] = {
+		x, y, z, // 1
+		x, y, -z, // 2
+		-x, y, -z, // 3
+		-x, y, z, // 4
+
+		x, -y, z, // 5
+		x, -y, -z, // 
+		-x, -y, -z,
+		-x, -y, z,
+	};
+
+	unsigned int point_indexes[] = {
+		0, 1, 2, 3, 7, 4, 5, 1,
+	};
+
+	unsigned int point_indexes_[] = {
+		6, 7, 4, 5, 1, 2, 3, 7
+	};
+
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glGenBuffers(1, &points);
+	glBindBuffer(GL_ARRAY_BUFFER, points);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vPositionList), vPositionList, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(2, points_index);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, points_index[0]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(point_indexes), point_indexes, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, points_index[1]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(point_indexes_), point_indexes_, GL_STATIC_DRAW);
+
 }
 
-GLuint complie_shaders()
+Box::~Box()
 {
-	GLchar* vertexsource, *fragmentsource;
-
-	//--- 버텍스 세이더 읽어 저장하고 컴파일 하기
-	vertexsource = filetobuf("vertex.glsl");
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexsource, NULL);
-	glCompileShader(vertexShader);
-	GLint result;
-	GLchar errorLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &result);
-	if (!result)
-	{
-		glGetShaderInfoLog(vertexShader, 512, NULL, errorLog);
-		std::cerr << "ERROR: vertex shader 컴파일 실패\n" << errorLog << std::endl;
-		return false;
-	}
-
-	//--- 프래그먼트 세이더 읽어 저장하고 컴파일하기
-	fragmentsource = filetobuf("fregment.glsl");
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentsource, NULL);
-	glCompileShader(fragmentShader);
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &result);
-	if (!result)
-	{
-		glGetShaderInfoLog(fragmentShader, 512, NULL, errorLog);
-		std::cerr << "ERROR: fragment shader 컴파일 실패\n" << errorLog << std::endl;
-		return false;
-	}
-
-	GLuint ShaderProgramID = glCreateProgram(); //--- 세이더 프로그램 만들기
-	glAttachShader(ShaderProgramID, vertexShader); // 세이더 프로그램에 버텍스 세이더 붙이기
-	glAttachShader(ShaderProgramID, fragmentShader); // 세이더 프로그램에 프래그먼트 세이더 붙이기
-	glLinkProgram(ShaderProgramID); // 세이더 프로그램 링크하기
-	glDeleteShader(vertexShader); // 세이더 프로그램에 링크하여 세이더 객체 자체는 삭제 가능
-	glDeleteShader(fragmentShader);
-	glGetProgramiv(ShaderProgramID, GL_LINK_STATUS, &result); // 세이더가 잘 연결되었는지 체크하기
-	if (!result) {
-		glGetProgramInfoLog(ShaderProgramID, 512, NULL, errorLog);
-		std::cerr << "ERROR: shader program 연결 실패\n" << errorLog << std::endl;
-		return false;
-	}
-	glUseProgram(ShaderProgramID); //--- 만들어진 세이더 프로그램 사용하기
-	// 여러 개의 프로그램 만들 수 있고, 특정 프로그램을 사용하려면
-	// glUseProgram 함수를 호출하여 사용 할 특정 프로그램을 지정한다.
-	// 사용하기 직전에 호출할 수 있다.
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-	return ShaderProgramID;
 }
 
-std::random_device rd;
-std::uniform_real_distribution<float> urd(0.0f, 1.0f);
-
-GLvoid drawScene(GLvoid);
-GLvoid Reshape(int w, int h);
-void draw();
-
-GLuint shaderID = 0;
-
-std::vector<StageBox*> vecBoxes;
-
-Robot* robot;
-Robot2* robot2;
-Stage* stage;
-//StageBox* stagebox;
-
-int howmany[9]{};
-int mouse_prev_x = 0, mouse_prev_y = 0;
-int mouse_dx = 0, mouse_dy = 0;
-
-BOOL up = false;
-BOOL down = false;
-BOOL bleft = false;
-BOOL bright = false;
-
-
-bool d_mode = false;
-
-void m_click(int button, int state, int x, int y) {
-
-	mouse_dx += x - mouse_prev_x;
-	mouse_dy += y - mouse_prev_y;
-
-	mouse_prev_x = x;
-	mouse_prev_y = y;
-
-	glutPostRedisplay();
-
-}
-
-bool timer_stop = false;
-int draw_mode = 0;
-int draw_quar = 0;
-
-float spin_self = 0.01;
-float whole_spin_rad = 0.f;
-float camera_spin = 0.f;
-glm::vec3 camera_pos = glm::vec3(1.f);
-float axis_x = 0.f, axis_y = 5.0f, axis_z = 15.0f;
-
-bool r_onoff = false;
-
-void key_input(unsigned char key, int x, int y) {
-	switch (key) {
-	case 'q':
-		glutLeaveMainLoop();
-		break;
-	case 'a':
-		camera_pos.x += 0.5f;
-		break;
-	case 'd':
-		camera_pos.x -= 0.5f;
-		break;
-	case 's':
-		camera_pos.z += 0.5f;
-		break;
-	case 'w':
-		camera_pos.z -= 0.5f;
-		break;
-	case 'y':
-		whole_spin_rad += -.1f;
-		break;
-	case 'Y':
-		whole_spin_rad -= -.1f;
-		break;
-	case 'u':
-		camera_spin += -.1f;
-		break;
-	case 'U':
-		camera_spin -= -.1f;
-		break;
-	case 'i':
-		robot->forward();
-		robot2->forward();
-		break;
-	case 'k':
-		robot->backward();
-		robot2->backward();
-		break;
-	case 'j':
-		robot->left();
-		robot2->left();
-		break;
-	case 'l':
-		robot->right();
-		robot2->right();
-		break;
-	case 'o':
-		robot->jump();
-		robot2->jump();
-		break;
-	case 'c':
-		camera_pos.x = axis_x;
-		camera_pos.y = axis_y;
-		camera_pos.z = axis_z;
-		whole_spin_rad = 0.f;
-		camera_spin = 0.f;
-		robot->reset();
-		robot2->reset();
-		break;
-	case 't':
-		for (auto& box : vecBoxes)
-		{
-			if(!box->GetBottomCheck())
-				box->left();
-		}
-		break;
-	case 'g':
-		for (auto& box : vecBoxes)
-		{
-			if (!box->GetBottomCheck())
-				box->right();
-		}
-		break;
-	case 'f':
-		for (auto& box : vecBoxes)
-		{
-			if (!box->GetBottomCheck())
-				box->backward();
-		}
-		break;
-	case 'h':
-		for (auto& box : vecBoxes)
-		{
-			if (!box->GetBottomCheck())
-				box->forward();
-		}
-		break;
-	}
-
-	
-
-	
-	
-}
-
-
-void menu_func(int value) {
-	switch (value) {
-	case 0:
-	{
-		static bool wire_mode = false;
-		wire_mode = !wire_mode;
-		if (wire_mode) {
-			draw_mode = GLU_LINE;
-		}
-		else {
-			draw_mode = GLU_FILL;
-		}
-	}
-	}
-}
-
-int pullout(int num, int th) {
-	return (int(num / pow(10, th - 1)) % 10);
-}
-
-void timer(int value) {
-	if (!timer_stop) {
-		value++;
-	}
-
-	bool checkAllBox = false;
-
-	for (auto& box : vecBoxes)
-	{
-		checkAllBox = box->GetBottomCheck();
-	}
-	if (vecBoxes.size() == 0)
-		checkAllBox = true;
-
-	if (checkAllBox)
-	{
-		StageBox* stagebox = new StageBox;
-		vecBoxes.emplace_back(stagebox);
-	}
-	
-
-	stage->update();
-	robot->update();
-	robot2->update();
-	for (auto& box : vecBoxes)
-	{
-		box->update();
-	}
-	
-	draw();
-	glutTimerFunc(1, timer, value);
-}
-
-extern int loadObj(const char*);
-
-void main(int argc, char** argv) {
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
-	glutInitWindowPosition(100, 100);
-	glutInitWindowSize(800, 600);
-	glutCreateWindow("Example1");
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
-		std::cerr << "Unable to initialize GLEW" << std::endl;
-		exit(EXIT_FAILURE);
-	}
-	else
-		std::cout << "GLEW Initialized\n";
-
-	std::cout<<"명령어" << std::endl;
-	std::cout << "i/j/k/l 캐릭터 움직임" << std::endl;
-	std::cout << "o 캐릭터 점프" << std::endl;
-	std::cout << "w/a/s/d 카메라이동" << std::endl;
-	std::cout << "y/Y 화면 중점 회전" << std::endl;
-	std::cout << "(추가)u/U 카메라 중점 회전" << std::endl;
-	std::cout << "c 초기화" << std::endl;
-	std::cout << "q 프로그램종료" << std::endl;
-
-	shaderID = complie_shaders(); // 세이더 프로그램
-
-	
-	stage = new Stage;
-	//stagebox = new StageBox;
-	robot = new Robot;
-	robot2 = new Robot2;
-
-	//camera_pos.x = axis_x;
-	//camera_pos.y = axis_y;
-	//camera_pos.z = axis_z;
-	camera_pos.x = axis_x;
-	camera_pos.y = 15.f;
-	camera_pos.z = 45.f;
-	whole_spin_rad = 0.f;
-		
-	glutMouseFunc(m_click);
-	glutKeyboardFunc(key_input);
-	glutDisplayFunc(drawScene);
-	glutReshapeFunc(Reshape);
-	glutTimerFunc(1, timer, 0);
-	int menu = glutCreateMenu(menu_func);
-	glutAddMenuEntry("Draw Mode", 0);
-	glutAttachMenu(GLUT_RIGHT_BUTTON);
-	glutMainLoop();
-}
-
-void set_color(float r, float g, float b) {
-	unsigned int color_location = glGetUniformLocation(shaderID, "uniform_color");
-	glUniform3f(color_location, r, g, b);
-}
-
-void Draw_Axis()
+void Box::draw()
 {
-	float length = 900.f;
-	set_color(1, 0, 0);
-
-
-	//X-axis (red)
-	glBegin(GL_LINES);
-	glVertex3f(-length, 0, 0);
-	glVertex3f(length, 0, 0);
-	glEnd();
-
-	set_color(0, 1, 0);
-	//Y-axis (green)
-	glBegin(GL_LINES);
-	glVertex3f(0, -length, 0);
-	glVertex3f(0, length, 0);
-	glEnd();
-
-	//Z-axis (blue)
-	set_color(0, 0, 1);
-	glBegin(GL_LINES);
-	glVertex3f(0, 0, -length);
-	glVertex3f(0, 0, length);
-	glEnd();
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, points_index[0]);
+	glDrawElements(GL_TRIANGLE_FAN, 8, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, points_index[1]);
+	glDrawElements(GL_TRIANGLE_FAN, 8, GL_UNSIGNED_INT, 0);
 }
 
-GLvoid drawScene() {
-	draw();
-}
-
-GLvoid Reshape(int w, int h)
+void Box::draw_frame()
 {
-	glViewport(0, 0, w, h);
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, points_index[0]);
+	glDrawElements(GL_LINE_LOOP, 8, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, points_index[1]);
+	glDrawElements(GL_LINE_LOOP, 8, GL_UNSIGNED_INT, 0);
 }
 
-void draw() {
-	glUseProgram(shaderID);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_DEPTH_TEST);
-	glClearColor(0.f, 0.f, 0.f, 0.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-	
+void Box::set_size(float x, float y, float z)
+{
+	float vPositionList[] = {
+	x, y, z, // 1
+	x, y, -z, // 2
+	-x, y, -z, // 3
+	-x, y, z, // 4
 
-	glm::vec3 cameraPos = glm::rotate(glm::mat4(1.0f), whole_spin_rad, glm::vec3(0, 1, 0)) * glm::vec4(camera_pos, 1.f);
-	glm::vec3 cameraDirection = glm::vec3(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-	glm::vec4 temp = glm::rotate(glm::mat4(1.0f), camera_spin, glm::vec3(0, 1, 0)) * glm::vec4(cameraDirection, 1.f);
-	cameraDirection = glm::vec3(temp.x / temp.w + cameraPos.x, temp.y / temp.w + cameraPos.y, temp.z / temp.w + cameraPos.z);
-	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
-	unsigned int viewLocation = glGetUniformLocation(shaderID, "viewTransform");
-	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
+	x, -y, z, // 5
+	x, -y, -z, // 
+	-x, -y, -z,
+	-x, -y, z,
+	};
+
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, points);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vPositionList), vPositionList, GL_DYNAMIC_DRAW);
+}
+
+void Box::set_size(glm::vec3 size)
+{
+	float x, y, z;
+	x = size.x, y = size.y, z = size.z;
+	float vPositionList[] = {
+		x, y, z, // 1
+		x, y, -z, // 2
+		-x, y, -z, // 3
+		-x, y, z, // 4
+
+		x, -y, z, // 5
+		x, -y, -z, // 
+		-x, -y, -z,
+		-x, -y, z,
+	};
+
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, points);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vPositionList), vPositionList, GL_DYNAMIC_DRAW);
+}
 
 
-	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(45.0f), (float)1.0f / (float)1.0f, 0.1f, 100.0f);
-	unsigned int projectionLocation = glGetUniformLocation(shaderID, "projectionTransform");
-	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
+//
 
 
-	unsigned int axis_location = glGetUniformLocation(shaderID, "modelTransform");
-	glm::mat4 model = glm::mat4(1.0f); // 초기화
-	glUniformMatrix4fv(axis_location, 1, GL_FALSE, glm::value_ptr(model));
-	Draw_Axis();
-	
-	unsigned int modelLocation = glGetUniformLocation(shaderID, "modelTransform");
-	model = glm::translate(model, glm::vec3(0, 0, 0));
-	model = glm::rotate(model, .0f, glm::vec3(0, 1, 0));
-	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model)); //--- modelTransform 변수에 변환 값 적용하기
-	
-	set_color(0.5, 0.4, 0.1);
-	stage->draw(shaderID, model);
-	robot->draw(shaderID, model);
-	//tetris->draw();
-	//robot2->draw(shaderID, model);
-	for (auto& box : vecBoxes)
-	{
-		box->draw(shaderID, model);
+void Robot::draw_head(GLuint location, glm::mat4 out)
+{
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(out));
+	set_color(1, 1, 1, 1);
+	face[0].draw();
+
+	set_color(0.f, 0.f, 0.f, 1.f);
+	glm::mat4 fm = glm::translate(out, glm::vec3(0, 0, head_size.z));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(fm));
+	face[1].draw();
+}
+
+void Robot::draw_arm(GLuint location, glm::mat4 out)
+{
+	set_color(1, 1, 0, 1);
+	float z_add = velocity.y > 0 ? -velocity.y : 0;
+	glm::mat4 la = glm::translate(out, glm::vec3(-body_size.x, 0, 0));
+	la = glm::translate(la, glm::vec3(0, arm_size.y, 0));
+	la = glm::rotate(la, radian(-15) - z_add, glm::vec3(0, 0, 1));
+	la = glm::rotate(la, -animation, glm::vec3(1, 0, 0));
+	la = glm::translate(la, glm::vec3(0, -arm_size.y, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(la));
+	arm[0].draw();
+
+
+	set_color(1, 1, 0, 1);
+	glm::mat4 ra = glm::translate(out, glm::vec3(body_size.x, 0, 0));
+	ra = glm::translate(ra, glm::vec3(0, arm_size.y, 0));
+	ra = glm::rotate(ra, radian(15) + z_add, glm::vec3(0, 0, 1));
+	ra = glm::rotate(ra, animation, glm::vec3(1, 0, 0));
+	ra = glm::translate(ra, glm::vec3(0, -arm_size.y, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(ra));
+	arm[1].draw();
+}
+
+void Robot::draw_leg(GLuint location, glm::mat4 out)
+{
+	set_color(0, 0.5, 0.5, 1);
+	glm::mat4 ll = glm::translate(out, glm::vec3(-0.2f, 0, 0));
+	ll = glm::translate(ll, glm::vec3(0, leg_size.y, 0));
+	ll = glm::rotate(ll, animation, glm::vec3(1, 0, 0));
+	ll = glm::translate(ll, glm::vec3(0, -leg_size.y, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(ll));
+	leg[0].draw();
+
+	set_color(0, 0.5, 0.5, 1);
+	glm::mat4 rl = glm::translate(out, glm::vec3(0.2f, 0, 0));
+	rl = glm::translate(rl, glm::vec3(0, leg_size.y, 0));
+	rl = glm::rotate(rl, -animation, glm::vec3(1, 0, 0));
+	rl = glm::translate(rl, glm::vec3(0, -leg_size.y, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(rl));
+	leg[1].draw();
+}
+
+Robot::Robot()
+{
+	head_size = glm::vec3(0.4f, 0.4f, 0.4f);
+	body_size = glm::vec3(0.5f, 0.8f, 0.5f);
+	arm_size = glm::vec3(0.1f, 0.6f, 0.2f);
+	leg_size = glm::vec3(0.1f, 0.6f, 0.2f);
+
+
+	face = new Box[2]; // head, nose
+	face[0].set_size(head_size);
+	face[1].set_size(0.1f, 0.1f, 0.1f);
+
+	body = new Box;
+	body->set_size(body_size);
+
+	pos.z = 2.f;
+
+	leg = new Box[2];
+	arm = new Box[2];
+
+	for (int i = 0; i < 2; ++i) {
+		leg[i].set_size(leg_size);
+		arm[i].set_size(arm_size);
 	}
-	
+	sight = 0;
+}
 
-	unsigned int color_location = glGetUniformLocation(shaderID, "uniform_color");
-	glUniform3f(color_location, 0.5f, 0.1f, 0.1f);
+Robot::~Robot()
+{
+
+}
+
+void Robot::update(glm::vec3 _pos, int* many)
+{
+	if (pos.y + (body_size.y + leg_size.y + head_size.y) * 2 > _pos.y)
+	{
+		if (pos.x < _pos.x + body_size.x && pos.x > _pos.x - body_size.x)
+		{
+			if (pos.z < _pos.z + body_size.z && pos.z > _pos.z - body_size.z)
+				deadcheck = true;
+		}
+	}
 
 
-	glutSwapBuffers();
+	pos += velocity;
+
+	pos.x = clamp(-10.f + body_size.x, pos.x, 10.f - body_size.x);
+	pos.y = clamp(0, pos.y, 50.f);
+	pos.z = clamp(body_size.z - 10.f, pos.z, 10.f - body_size.z);
+	velocity.y -= 0.000098;
+	velocity.x = velocity.x;
+	velocity.z = velocity.z;
+
+	CheckCollision(_pos, many);
+	if (collisioncheck)
+	{
+		pos -= velocity;
+		collisioncheck = false;
+	}
+	frame += (velocity.z + velocity.x);
+	animation = sin(frame) * radian(45);
+}
+
+void Robot::CheckCollision(glm::vec3 _pos, int* many)
+{
+	for (int i = 0; i < 9; ++i)
+	{
+		if (pos.x >= -3.f && pos.x < -1.f)
+		{
+			if (pos.z >= -1.f && pos.z < 1.f)
+			{
+				if (many[i] * 2 > pos.y)
+					collisioncheck = true;
+			}
+			if (pos.z >= -3.f && pos.z < 1.f)
+			{
+				if (many[i] * 2 > pos.y)
+					collisioncheck = true;
+			}
+			if (pos.z >= 1.f && pos.z < 3.f)
+			{
+				if (many[i] * 2 > pos.y)
+					collisioncheck = true;
+			}
+		}
+		if (pos.x >= -1.f && pos.x < 1.f)
+		{
+			if (pos.z + (2 * body_size.z) >= -1.f && pos.z - (2 * body_size.z) < 1.f)
+			{
+				if (many[i] * 2 > pos.y)
+					collisioncheck = true;
+			}
+			if (pos.z >= -3.f && pos.z < 1.f)
+			{
+				if (many[i] * 2 > pos.y)
+					collisioncheck = true;
+			}
+			if (pos.z >= 1.f && pos.z < 3.f)
+			{
+				if (many[i] * 2 > pos.y)
+					collisioncheck = true;
+			}
+		}
+		if (pos.x >= 1.f && pos.x < 3.f)
+		{
+			if (pos.z >= -1.f && pos.z < 1.f)
+			{
+				if (many[i] * 2 > pos.y)
+					collisioncheck = true;
+			}
+			if (pos.z >= -3.f && pos.z < 1.f)
+			{
+				if (many[i] * 2 > pos.y)
+					collisioncheck = true;
+			}
+			if (pos.z >= 1.f && pos.z < 3.f)
+			{
+				if (many[i] * 2 > pos.y)
+					collisioncheck = true;
+			}
+		}
+
+	}
+
+}
+
+void Robot::draw(GLuint shaderID, glm::mat4 out)
+{
+	unsigned int location = glGetUniformLocation(shaderID, "modelTransform");
+	glm::mat4 model = glm::translate(out, pos);
+	model = glm::rotate(model, radian(sight), glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(model));
+
+	set_color(1, 1, 1, 1);
+
+	model = glm::translate(model, glm::vec3(0, leg_size.y - 0.1f, 0));
+	draw_leg(location, model);
+
+	model = glm::translate(model, glm::vec3(0, leg_size.y + body_size.y, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(model));
+	set_color(0, 1, 0.1, 1);
+	body->draw();
+
+	glm::mat4 arm_model = glm::translate(model, glm::vec3(0, body_size.y / 4, 0));
+	draw_arm(location, arm_model);
+
+	model = glm::translate(model, glm::vec3(0, body_size.y + head_size.y, 0));
+	draw_head(location, model);
+}
+
+void Robot::jump()
+{
+	if (pos.y <= 0.001f) {
+		velocity.y = .03f;
+	}
+}
+
+void Robot::right()
+{
+	velocity.x = 0.01f;
+	velocity.z = 0;
+	sight = 90;
+}
+
+void Robot::left()
+{
+	velocity.x = -0.01f;
+	velocity.z = 0;
+	sight = 270;
+}
+
+void Robot::forward()
+{
+	velocity.x = 0;
+	velocity.z = -0.01f;
+	sight = 180;
+}
+
+void Robot::backward()
+{
+	velocity.x = 0;
+	velocity.z = 0.01f;
+	sight = 0;
+}
+
+void Robot::reset()
+{
+	velocity = glm::vec3(0, 0, 0);
+	pos = glm::vec3(0, 0, 0);
+	sight = 0;
+	frame = 0;
+	animation = 0;
+}
+
+glm::vec3 Robot::pos2()
+{
+	return pos;
+}
+
+//
+
+
+
+Stage::Stage()
+{
+	pos.x = -2.f;
+	pos.z = -2.f;
+	boxes = new Box[9];
+	len = 1.f;
+	boxes[0].set_size(len, 0.01f, len);
+	boxes[1].set_size(len, 0.01f, len);
+	boxes[2].set_size(len, 0.01f, len);
+	boxes[3].set_size(len, 0.01f, len);
+	boxes[4].set_size(len, 0.01f, len);
+	boxes[5].set_size(len, 0.01f, len);
+	boxes[6].set_size(len, 0.01f, len);
+	boxes[7].set_size(len, 0.01f, len);
+	boxes[8].set_size(len, 0.01f, len);
+}
+
+Stage::~Stage()
+{
+	delete[] boxes;
+}
+
+void Stage::stage_up()
+{
+	curtain_up += 0.01;
+}
+
+void Stage::stage_down()
+{
+	curtain_up -= 0.01;
+}
+
+void Stage::draw(GLuint shaderID, glm::mat4 out)
+{
+	int i = 0;
+	unsigned int location = glGetUniformLocation(shaderID, "modelTransform");
+	//glm::mat4 model = out * glm::mat4(1.0f); 
+	glm::mat4 model = glm::translate(out, pos);
+
+	set_color(1, 0, 0, 1);
+	glm::mat4 m0 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m0));
+	boxes[i].draw();
+	i++;
+
+	set_color(0, 1, 0, 1);
+	glm::mat4 m1 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m1));
+	boxes[i].draw();
+	i++;
+
+	set_color(1, 1, 0, 1);
+	glm::mat4 m2 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m2));
+	boxes[i].draw();
+	i++;
+
+	set_color(0, 0, 1, 1);
+	glm::mat4 m3 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m3));
+	boxes[i].draw();
+	i++;
+
+	set_color(1, 0, 1, 1);
+	glm::mat4 m4 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m4));
+	boxes[i].draw();
+	i++;
+
+	set_color(0, 1, 1, 1);
+	glm::mat4 m5 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
+	m5 = glm::translate(m5, glm::vec3(0, stage_curtain, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m5));
+	boxes[i].draw();
+	i++;
+
+	set_color(0, 1, 0, 1);
+	glm::mat4 m6 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m6));
+	boxes[i].draw();
+	i++;
+
+	set_color(0, 0, 1, 1);
+	glm::mat4 m7 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m7));
+	boxes[i].draw();
+	i++;
+
+	set_color(0, 1, 0, 1);
+	glm::mat4 m8 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
+	m5 = glm::translate(m5, glm::vec3(0, stage_curtain, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m8));
+	boxes[i].draw();
+	i++;
+}
+
+void Stage::update()
+{
+	stage_curtain = clamp(0, stage_curtain + curtain_up, len * 2);
+}
+
+
+StageBox::StageBox()
+{
+	boxes = new Box[6];
+	len = 1.f;
+	alpha = 1.f;
+	pos.y = 10.f;
+	velocity.y = 0.01f;
+
+	boxes[0].set_size(len, 0.01f, len);
+	boxes[1].set_size(len, 0.01f, len);
+	boxes[2].set_size(0.01f, len, len);
+	boxes[3].set_size(0.01f, len, len);
+	boxes[4].set_size(len, len, 0.01f);
+	boxes[5].set_size(len, len, 0.01f);
+}
+
+
+StageBox::~StageBox()
+{
+	delete[] boxes;
+}
+
+void StageBox::draw(GLuint shaderID, glm::mat4 out)
+{
+	int i = 0;
+	unsigned int location = glGetUniformLocation(shaderID, "modelTransform");
+
+	//glm::mat4 model = out * glm::mat4(1.0f);
+	glm::mat4 model = glm::translate(out, pos);
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(model));
+	//set_color(1, 0, 0);
+	//boxes[i].draw();
+	//i++;
+	//model = glm::translate(model, glm::vec3(3.0f, len +1.0f, 0));							// y 축
+	//model = glm::rotate(model, 1.0f, glm::vec3(0, 0, 1));
+	//model = glm::rotate(model, rot, glm::vec3(1, 1, 0));
+
+	set_color(1, 0, 0, alpha);
+	glm::mat4 m0 = glm::translate(model, glm::vec3(0, 0, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m0));
+	boxes[i].draw();
+	i++;
+
+	set_color(0, 1, 0, alpha);
+	glm::mat4 m1 = glm::translate(model, glm::vec3(0, 2 * len, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m1));
+	boxes[i].draw();
+	i++;
+
+	set_color(1, 1, 0, alpha);
+	glm::mat4 m2 = glm::translate(model, glm::vec3(len, len, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m2));
+	boxes[i].draw();
+	i++;
+
+	set_color(0, 0, 1, alpha);
+	glm::mat4 m3 = glm::translate(model, glm::vec3(-len, len, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m3));
+	boxes[i].draw();
+	i++;
+
+	set_color(1, 0, 1, alpha);
+	glm::mat4 m4 = glm::translate(model, glm::vec3(0, len, -len));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m4));
+	boxes[i].draw();
+	i++;
+
+
+	set_color(0, 1, 1, alpha);
+	glm::mat4 m5 = glm::translate(model, glm::vec3(0, len, len));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m5));
+	boxes[i].draw();
+	i++;
+
+
+}
+
+void StageBox::update()
+{
+
+}
+
+void StageBox::update(int* many)
+{
+	if (!bottomCheck)
+	{
+		pos.y -= velocity.y;
+
+		if (pos.x == 0.f)
+		{
+			if (pos.z == 0.f)
+			{
+				pos.y = clamp(many[4] * 2, pos.y, 100.f);
+				if (many[4] * 2 == pos.y)
+					bottomCheck = true;
+			}
+			else if (pos.z == -2.f)
+			{
+				pos.y = clamp(many[7] * 2, pos.y, 100.f);
+				if (many[7] * 2 == pos.y)
+					bottomCheck = true;
+			}
+			else if (pos.z == 2.f)
+			{
+				pos.y = clamp(many[1] * 2, pos.y, 100.f);
+				if (many[1] * 2 == pos.y)
+					bottomCheck = true;
+			}
+		}
+		else if (pos.x == -2.f)
+		{
+			if (pos.z == 0.f)
+			{
+				pos.y = clamp(many[3] * 2, pos.y, 100.f);
+				if (many[3] * 2 == pos.y)
+					bottomCheck = true;
+			}
+			else if (pos.z == -2.f)
+			{
+				pos.y = clamp(many[6] * 2, pos.y, 100.f);
+				if (many[6] * 2 == pos.y)
+					bottomCheck = true;
+			}
+			else if (pos.z == 2.f)
+			{
+				pos.y = clamp(many[0] * 2, pos.y, 100.f);
+				if (many[0] * 2 == pos.y)
+					bottomCheck = true;
+			}
+		}
+		else if (pos.x == 2.f)
+		{
+			if (pos.z == 0.f)
+			{
+				pos.y = clamp(many[5] * 2, pos.y, 100.f);
+				if (many[5] * 2 == pos.y)
+					bottomCheck = true;
+			}
+			else if (pos.z == -2.f)
+			{
+				pos.y = clamp(many[8] * 2, pos.y, 100.f);
+				if (many[8] * 2 == pos.y)
+					bottomCheck = true;
+			}
+			else if (pos.z == 2.f)
+			{
+				pos.y = clamp(many[2] * 2, pos.y, 100.f);
+				if (many[2] * 2 == pos.y)
+					bottomCheck = true;
+			}
+		}
+
+	}
+}
+
+void StageBox::check_bottom()
+{
+
+}
+
+void StageBox::right()
+{
+	pos.z += len * 2;
+}
+
+void StageBox::left()
+{
+	pos.z -= len * 2;
+}
+
+void StageBox::forward()
+{
+	pos.x += len * 2;
+}
+
+void StageBox::backward()
+{
+	pos.x -= len * 2;
+}
+
+void StageBox::SetPos(glm::vec3 _pos, int* many)
+{
+	pos.x = _pos.x;
+	pos.z = _pos.z;
+
+	if (pos.x == 0.f)
+	{
+		if (pos.z == 0.f)
+		{
+			pos.y = many[4] * 2;
+		}
+		else if (pos.z == -2.f)
+		{
+			pos.y = many[7] * 2;
+		}
+		else if (pos.z == 2.f)
+		{
+			pos.y = many[1] * 2;
+		}
+	}
+	else if (pos.x == -2.f)
+	{
+		if (pos.z == 0.f)
+		{
+			pos.y = many[3] * 2;
+		}
+		else if (pos.z == -2.f)
+		{
+			pos.y = many[6] * 2;
+		}
+		else if (pos.z == 2.f)
+		{
+			pos.y = many[0] * 2;
+		}
+	}
+	else if (pos.x == 2.f)
+	{
+		if (pos.z == 0.f)
+		{
+			pos.y = many[5] * 2;
+		}
+		else if (pos.z == -2.f)
+		{
+			pos.y = many[8] * 2;
+		}
+		else if (pos.z == 2.f)
+		{
+			pos.y = many[2] * 2;
+		}
+	}
+}
+
+
+
+void Robot2::draw_head(GLuint location, glm::mat4 out)
+{
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(out));
+	set_color(1, 1, 1, 1);
+	face[0].draw();
+
+	set_color(0.f, 0.f, 0.f, 1);
+	glm::mat4 fm = glm::translate(out, glm::vec3(0, 0, head_size.z));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(fm));
+	face[1].draw();
+}
+
+void Robot2::draw_arm(GLuint location, glm::mat4 out)
+{
+	set_color(1, 1, 0, 1);
+	float z_add = velocity.y > 0 ? -velocity.y : 0;
+	glm::mat4 la = glm::translate(out, glm::vec3(-body_size.x, 0, 0));
+	la = glm::translate(la, glm::vec3(0, arm_size.y, 0));
+	la = glm::rotate(la, radian(-15) - z_add, glm::vec3(0, 0, 1));
+	la = glm::rotate(la, -animation, glm::vec3(1, 0, 0));
+	la = glm::translate(la, glm::vec3(0, -arm_size.y, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(la));
+	arm[0].draw();
+
+
+	set_color(1, 1, 0, 1);
+	glm::mat4 ra = glm::translate(out, glm::vec3(body_size.x, 0, 0));
+	ra = glm::translate(ra, glm::vec3(0, arm_size.y, 0));
+	ra = glm::rotate(ra, radian(15) + z_add, glm::vec3(0, 0, 1));
+	ra = glm::rotate(ra, animation, glm::vec3(1, 0, 0));
+	ra = glm::translate(ra, glm::vec3(0, -arm_size.y, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(ra));
+	arm[1].draw();
+}
+
+void Robot2::draw_leg(GLuint location, glm::mat4 out)
+{
+	set_color(0, 0.5, 0.5, 1);
+	glm::mat4 ll = glm::translate(out, glm::vec3(-0.2f, 0, 0));
+	ll = glm::translate(ll, glm::vec3(0, leg_size.y, 0));
+	ll = glm::rotate(ll, animation, glm::vec3(1, 0, 0));
+	ll = glm::translate(ll, glm::vec3(0, -leg_size.y, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(ll));
+	leg[0].draw();
+
+	set_color(0, 0.5, 0.5, 1);
+	glm::mat4 rl = glm::translate(out, glm::vec3(0.2f, 0, 0));
+	rl = glm::translate(rl, glm::vec3(0, leg_size.y, 0));
+	rl = glm::rotate(rl, -animation, glm::vec3(1, 0, 0));
+	rl = glm::translate(rl, glm::vec3(0, -leg_size.y, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(rl));
+	leg[1].draw();
+}
+
+Robot2::Robot2()
+{
+	head_size = glm::vec3(0.4f, 0.4f, 0.4f);
+	body_size = glm::vec3(0.5f, .8f, .6f);
+	arm_size = glm::vec3(0.1f, 0.6f, 0.2f);
+	leg_size = glm::vec3(0.1f, 0.6f, 0.2f);
+
+
+	face = new Box[2]; // head, nose
+	face[0].set_size(head_size);
+	face[1].set_size(0.1f, 0.1f, 0.1f);
+
+	body = new Box;
+	body->set_size(body_size);
+
+
+	leg = new Box[2];
+	arm = new Box[2];
+
+	for (int i = 0; i < 2; ++i) {
+		leg[i].set_size(leg_size);
+		arm[i].set_size(arm_size);
+	}
+	sight = 0;
+}
+
+Robot2::~Robot2()
+{
+
+}
+
+void Robot2::update()
+{
+	pos += velocity;
+	pos.x = clamp(-10.f + body_size.x, pos.x + 3.f, 10.f - body_size.x);
+	pos.y = clamp(0, pos.y, 50.f);
+	pos.z = clamp(body_size.z - 10.f, pos.z, 10.f - body_size.z);
+	velocity.y -= 0.000098;
+	velocity.x = velocity.x;
+	velocity.z = velocity.z;
+
+
+	frame += (velocity.z + velocity.x);
+	animation = sin(frame) * radian(45);
+}
+
+void Robot2::draw(GLuint shaderID, glm::mat4 out)
+{
+	unsigned int location = glGetUniformLocation(shaderID, "modelTransform");
+	glm::mat4 model = glm::translate(out, pos);
+	model = glm::rotate(model, radian(sight), glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(model));
+
+	set_color(1, 1, 1, 1);
+
+	model = glm::translate(model, glm::vec3(0, leg_size.y - 0.1f, 0));
+	draw_leg(location, model);
+
+	model = glm::translate(model, glm::vec3(0, leg_size.y + body_size.y, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(model));
+	set_color(0, 1, 0.1, 1);
+	body->draw();
+
+	glm::mat4 arm_model = glm::translate(model, glm::vec3(0, body_size.y / 4, 0));
+	draw_arm(location, arm_model);
+
+	model = glm::translate(model, glm::vec3(0, body_size.y + head_size.y, 0));
+	draw_head(location, model);
+}
+
+void Robot2::jump()
+{
+	if (pos.y <= 0.001f) {
+		velocity.y = .03f;
+	}
+}
+
+void Robot2::right()
+{
+	velocity.x = 0.01f;
+	velocity.z = 0;
+	sight = 90;
+}
+
+void Robot2::left()
+{
+	velocity.x = -0.01f;
+	velocity.z = 0;
+	sight = 270;
+}
+
+void Robot2::forward()
+{
+	velocity.x = 0;
+	velocity.z = -0.01f;
+	sight = 180;
+}
+
+void Robot2::backward()
+{
+	velocity.x = 0;
+	velocity.z = 0.01f;
+	sight = 0;
+}
+
+void Robot2::reset()
+{
+	velocity = glm::vec3(0, 0, 0);
+	pos = glm::vec3(0, 0, 0);
+	sight = 0;
+	frame = 0;
+	animation = 0;
+}
+
+glm::vec3 Robot2::pos2()
+{
+	return pos;
 }

@@ -1,5 +1,56 @@
-﻿  main.cpp
-D:\CG_Project\Project3\Project3\main.cpp(125,23): warning C4305: '초기화 중': 'double'에서 'float'(으)로 잘립니다.
-D:\CG_Project\Project3\Project3\main.cpp(283,34): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
-D:\CG_Project\Project3\Project3\main.cpp(409,25): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
-  Project3.vcxproj -> D:\CG_Project\Project3\Debug\Project3.exe
+﻿robot.obj : error LNK2005: "public: __thiscall Box::Box(void)" (??0Box@@QAE@XZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: __thiscall Robot2::Robot2(void)" (??0Robot2@@QAE@XZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: __thiscall Robot::Robot(void)" (??0Robot@@QAE@XZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: __thiscall Stage::Stage(void)" (??0Stage@@QAE@XZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: __thiscall StageBox::StageBox(void)" (??0StageBox@@QAE@XZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: __thiscall Box::~Box(void)" (??1Box@@QAE@XZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: __thiscall Robot2::~Robot2(void)" (??1Robot2@@QAE@XZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: __thiscall Robot::~Robot(void)" (??1Robot@@QAE@XZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: __thiscall Stage::~Stage(void)" (??1Stage@@QAE@XZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: __thiscall StageBox::~StageBox(void)" (??1StageBox@@QAE@XZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "private: void __thiscall Robot::CheckCollision(struct glm::vec<3,float,0>,int *)" (?CheckCollision@Robot@@AAEXU?$vec@$02M$0A@@glm@@PAH@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall StageBox::SetPos(struct glm::vec<3,float,0>,int *)" (?SetPos@StageBox@@QAEXU?$vec@$02M$0A@@glm@@PAH@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot2::backward(void)" (?backward@Robot2@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot::backward(void)" (?backward@Robot@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall StageBox::backward(void)" (?backward@StageBox@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall StageBox::check_bottom(void)" (?check_bottom@StageBox@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Box::draw(void)" (?draw@Box@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot2::draw(unsigned int,struct glm::mat<4,4,float,0>)" (?draw@Robot2@@QAEXIU?$mat@$03$03M$0A@@glm@@@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot::draw(unsigned int,struct glm::mat<4,4,float,0>)" (?draw@Robot@@QAEXIU?$mat@$03$03M$0A@@glm@@@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Stage::draw(unsigned int,struct glm::mat<4,4,float,0>)" (?draw@Stage@@QAEXIU?$mat@$03$03M$0A@@glm@@@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall StageBox::draw(unsigned int,struct glm::mat<4,4,float,0>)" (?draw@StageBox@@QAEXIU?$mat@$03$03M$0A@@glm@@@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "private: void __thiscall Robot2::draw_arm(unsigned int,struct glm::mat<4,4,float,0>)" (?draw_arm@Robot2@@AAEXIU?$mat@$03$03M$0A@@glm@@@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "private: void __thiscall Robot::draw_arm(unsigned int,struct glm::mat<4,4,float,0>)" (?draw_arm@Robot@@AAEXIU?$mat@$03$03M$0A@@glm@@@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Box::draw_frame(void)" (?draw_frame@Box@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "private: void __thiscall Robot2::draw_head(unsigned int,struct glm::mat<4,4,float,0>)" (?draw_head@Robot2@@AAEXIU?$mat@$03$03M$0A@@glm@@@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "private: void __thiscall Robot::draw_head(unsigned int,struct glm::mat<4,4,float,0>)" (?draw_head@Robot@@AAEXIU?$mat@$03$03M$0A@@glm@@@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "private: void __thiscall Robot2::draw_leg(unsigned int,struct glm::mat<4,4,float,0>)" (?draw_leg@Robot2@@AAEXIU?$mat@$03$03M$0A@@glm@@@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "private: void __thiscall Robot::draw_leg(unsigned int,struct glm::mat<4,4,float,0>)" (?draw_leg@Robot@@AAEXIU?$mat@$03$03M$0A@@glm@@@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot2::forward(void)" (?forward@Robot2@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot::forward(void)" (?forward@Robot@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall StageBox::forward(void)" (?forward@StageBox@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot2::jump(void)" (?jump@Robot2@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot::jump(void)" (?jump@Robot@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot2::left(void)" (?left@Robot2@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot::left(void)" (?left@Robot@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall StageBox::left(void)" (?left@StageBox@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: struct glm::vec<3,float,0> __thiscall Robot2::pos2(void)" (?pos2@Robot2@@QAE?AU?$vec@$02M$0A@@glm@@XZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: struct glm::vec<3,float,0> __thiscall Robot::pos2(void)" (?pos2@Robot@@QAE?AU?$vec@$02M$0A@@glm@@XZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot2::reset(void)" (?reset@Robot2@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot::reset(void)" (?reset@Robot@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot2::right(void)" (?right@Robot2@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot::right(void)" (?right@Robot@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall StageBox::right(void)" (?right@StageBox@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Box::set_size(float,float,float)" (?set_size@Box@@QAEXMMM@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Box::set_size(struct glm::vec<3,float,0>)" (?set_size@Box@@QAEXU?$vec@$02M$0A@@glm@@@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Stage::stage_down(void)" (?stage_down@Stage@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Stage::stage_up(void)" (?stage_up@Stage@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot2::update(void)" (?update@Robot2@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Robot::update(struct glm::vec<3,float,0>,int *)" (?update@Robot@@QAEXU?$vec@$02M$0A@@glm@@PAH@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall Stage::update(void)" (?update@Stage@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall StageBox::update(int *)" (?update@StageBox@@QAEXPAH@Z)이(가) main.obj에 이미 정의되어 있습니다.
+robot.obj : error LNK2005: "public: void __thiscall StageBox::update(void)" (?update@StageBox@@QAEXXZ)이(가) main.obj에 이미 정의되어 있습니다.
+main.obj : error LNK2019: "void __cdecl set_color(float,float,float,float)" (?set_color@@YAXMMMM@Z)"public: void __thiscall Robot2::draw(unsigned int,struct glm::mat<4,4,float,0>)" (?draw@Robot2@@QAEXIU?$mat@$03$03M$0A@@glm@@@Z) 함수에서 참조되는 확인할 수 없는 외부 기호
+robot.obj : error LNK2001: 확인할 수 없는 외부 기호 "void __cdecl set_color(float,float,float,float)" (?set_color@@YAXMMMM@Z)
+MSVCRTD.lib(exe_main.obj) : error LNK2019: _main"int __cdecl invoke_main(void)" (?invoke_main@@YAHXZ) 함수에서 참조되는 확인할 수 없는 외부 기호
+D:\CG_Project\Project3\Debug\Project3.exe : fatal error LNK1120: 2개의 확인할 수 없는 외부 참조입니다.
