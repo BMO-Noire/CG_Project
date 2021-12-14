@@ -87,13 +87,22 @@ void draw();
 
 GLuint shaderID = 0;
 
+std::vector<StageBox*> vecBoxes;
 
 Robot* robot;
 Robot2* robot2;
 Stage* stage;
-StageBox* stagebox;
+//StageBox* stagebox;
+
+int howmany[9]{};
 int mouse_prev_x = 0, mouse_prev_y = 0;
 int mouse_dx = 0, mouse_dy = 0;
+
+BOOL up = false;
+BOOL down = false;
+BOOL bleft = false;
+BOOL bright = false;
+
 
 bool d_mode = false;
 
@@ -120,6 +129,7 @@ glm::vec3 camera_pos = glm::vec3(1.f);
 float axis_x = 0.f, axis_y = 5.0f, axis_z = 15.0f;
 
 bool r_onoff = false;
+
 void key_input(unsigned char key, int x, int y) {
 	switch (key) {
 	case 'q':
@@ -178,7 +188,40 @@ void key_input(unsigned char key, int x, int y) {
 		robot->reset();
 		robot2->reset();
 		break;
+	case 't':
+		for (auto& box : vecBoxes)
+		{
+			if(!box->GetBottomCheck())
+				box->left();
+		}
+		break;
+	case 'g':
+		for (auto& box : vecBoxes)
+		{
+			if (!box->GetBottomCheck())
+				box->right();
+		}
+		break;
+	case 'f':
+		for (auto& box : vecBoxes)
+		{
+			if (!box->GetBottomCheck())
+				box->backward();
+		}
+		break;
+	case 'h':
+		for (auto& box : vecBoxes)
+		{
+			if (!box->GetBottomCheck())
+				box->forward();
+		}
+		break;
 	}
+
+	
+
+	
+	
 }
 
 
@@ -206,11 +249,31 @@ void timer(int value) {
 	if (!timer_stop) {
 		value++;
 	}
+
+	bool checkAllBox = false;
+
+	for (auto& box : vecBoxes)
+	{
+		checkAllBox = box->GetBottomCheck();
+	}
+	if (vecBoxes.size() == 0)
+		checkAllBox = true;
+
+	if (checkAllBox)
+	{
+		StageBox* stagebox = new StageBox;
+		vecBoxes.emplace_back(stagebox);
+	}
 	
+
 	stage->update();
 	robot->update();
 	robot2->update();
-	stagebox->update();
+	for (auto& box : vecBoxes)
+	{
+		box->update();
+	}
+	
 	draw();
 	glutTimerFunc(1, timer, value);
 }
@@ -244,18 +307,18 @@ void main(int argc, char** argv) {
 
 	
 	stage = new Stage;
-	stagebox = new StageBox;
+	//stagebox = new StageBox;
 	robot = new Robot;
 	robot2 = new Robot2;
 
+	//camera_pos.x = axis_x;
+	//camera_pos.y = axis_y;
+	//camera_pos.z = axis_z;
 	camera_pos.x = axis_x;
-	camera_pos.y = axis_y;
-	camera_pos.z = axis_z;
+	camera_pos.y = 15.f;
+	camera_pos.z = 45.f;
 	whole_spin_rad = 0.f;
 		
-
-	
-
 	glutMouseFunc(m_click);
 	glutKeyboardFunc(key_input);
 	glutDisplayFunc(drawScene);
@@ -346,8 +409,13 @@ void draw() {
 	set_color(0.5, 0.4, 0.1);
 	stage->draw(shaderID, model);
 	robot->draw(shaderID, model);
+	//tetris->draw();
 	//robot2->draw(shaderID, model);
-	//stagebox->draw(shaderID, model);
+	for (auto& box : vecBoxes)
+	{
+		box->draw(shaderID, model);
+	}
+	
 
 	unsigned int color_location = glGetUniformLocation(shaderID, "uniform_color");
 	glUniform3f(color_location, 0.5f, 0.1f, 0.1f);

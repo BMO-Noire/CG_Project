@@ -18,6 +18,8 @@ public:
 class Stage {
 	Box* boxes;
 
+	glm::vec3 pos;
+
 	float len;
 
 	float curtain_up;
@@ -36,16 +38,29 @@ public:
 class StageBox {
 	Box* boxes;
 
+	glm::vec3 pos;
+	glm::vec3 velocity;
+
+	float rot;
 	float len;
+
+	bool bottomCheck;
 
 public:
 	StageBox();
 	~StageBox();
 
-	float rot;
-
+	
 	void draw(GLuint shader, glm::mat4 out);
 	void update();
+	void check_bottom();
+	void right();
+	void left();
+	void forward();
+	void backward();
+
+	bool GetBottomCheck() { return bottomCheck; };
+
 };
 
 

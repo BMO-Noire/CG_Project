@@ -295,10 +295,19 @@ glm::vec3 Robot::pos2()
 
 Stage::Stage()
 {
-	boxes = new Box[2];
-	len = 10.f;
+	pos.x = -2.f;
+	pos.z = -2.f;
+	boxes = new Box[9];
+	len = 1.f;
 	boxes[0].set_size(len, 0.01f, len);
 	boxes[1].set_size(len, 0.01f, len);
+	boxes[2].set_size(len, 0.01f, len);
+	boxes[3].set_size(len, 0.01f, len);
+	boxes[4].set_size(len, 0.01f, len);
+	boxes[5].set_size(len, 0.01f, len);
+	boxes[6].set_size(len, 0.01f, len);
+	boxes[7].set_size(len, 0.01f, len);
+	boxes[8].set_size(len, 0.01f, len);
 }
 
 Stage::~Stage()
@@ -320,42 +329,62 @@ void Stage::draw(GLuint shaderID, glm::mat4 out)
 {
 	int i = 0;
 	unsigned int location = glGetUniformLocation(shaderID, "modelTransform");
-	glm::mat4 model = out * glm::mat4(1.0f); 
-	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(model));
+	//glm::mat4 model = out * glm::mat4(1.0f); 
+	glm::mat4 model = glm::translate(out, pos);
+
 	set_color(1, 0, 0);
+	glm::mat4 m0 = glm::translate(model, glm::vec3((i % 3)*len*2, 0, (i / 3)*len*2));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m0));
 	boxes[i].draw();
 	i++;
-	model = glm::translate(model, glm::vec3(0, len, 0));
-
+	
 	set_color(0, 1, 0);
-	glm::mat4 m1 = glm::translate(model, glm::vec3(0, len, 0));
+	glm::mat4 m1 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m1));
 	boxes[i].draw();
 	i++;
 
 	set_color(1, 1, 0);
-	glm::mat4 m2 = glm::translate(model, glm::vec3(len, 0, 0));
+	glm::mat4 m2 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m2));
 	boxes[i].draw();
 	i++;
 
 	set_color(0, 0, 1);
-	glm::mat4 m3 = glm::translate(model, glm::vec3(-len, 0, 0));
+	glm::mat4 m3 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m3));
 	boxes[i].draw();
 	i++;
 
 	set_color(1, 0, 1);
-	glm::mat4 m4 = glm::translate(model, glm::vec3(0, 0, -len));
+	glm::mat4 m4 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m4));
 	boxes[i].draw();
 	i++;
 
-
 	set_color(0, 1, 1);
-	glm::mat4 m5 = glm::translate(model, glm::vec3(0, 0, len));
+	glm::mat4 m5 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
 	m5 = glm::translate(m5, glm::vec3(0, stage_curtain, 0));
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m5));
+	boxes[i].draw();
+	i++;
+
+	set_color(0, 1, 0);
+	glm::mat4 m6 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m6));
+	boxes[i].draw();
+	i++;
+
+	set_color(0, 0, 1);
+	glm::mat4 m7 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m7));
+	boxes[i].draw();
+	i++;
+
+	set_color(0, 1, 0);
+	glm::mat4 m8 = glm::translate(model, glm::vec3((i % 3) * len * 2, 0, (i / 3) * len * 2));
+	m5 = glm::translate(m5, glm::vec3(0, stage_curtain, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m8));
 	boxes[i].draw();
 	i++;
 }
@@ -370,6 +399,9 @@ StageBox::StageBox()
 {
 	boxes = new Box[6];
 	len = 1.f;
+	pos.y = 5.f;
+	velocity.y = 0.01f;
+
 	boxes[0].set_size(len, 0.01f, len);
 	boxes[1].set_size(len, 0.01f, len);
 	boxes[2].set_size(0.01f, len, len);
@@ -389,50 +421,110 @@ void StageBox::draw(GLuint shaderID, glm::mat4 out)
 	int i = 0;
 	unsigned int location = glGetUniformLocation(shaderID, "modelTransform");
 
-	glm::mat4 model = out * glm::mat4(1.0f);
+	//glm::mat4 model = out * glm::mat4(1.0f);
+	glm::mat4 model = glm::translate(out, pos);
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(model));
+	//set_color(1, 0, 0);
+	//boxes[i].draw();
+	//i++;
+	//model = glm::translate(model, glm::vec3(3.0f, len +1.0f, 0));							// y รเ
+	//model = glm::rotate(model, 1.0f, glm::vec3(0, 0, 1));
+	//model = glm::rotate(model, rot, glm::vec3(1, 1, 0));
+
 	set_color(1, 0, 0);
+	glm::mat4 m0 = glm::translate(model, glm::vec3(0, 0, 0));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m0));
 	boxes[i].draw();
 	i++;
-	model = glm::translate(model, glm::vec3(3.0f, len +1.0f, 0));							// y รเ
-	model = glm::rotate(model, 1.0f, glm::vec3(0, 0, 1));
-	model = glm::rotate(model, rot, glm::vec3(1, 1, 0));
 
 	set_color(0, 1, 0);
-	glm::mat4 m1 = glm::translate(model, glm::vec3(0, len, 0));
+	glm::mat4 m1 = glm::translate(model, glm::vec3(0, 2*len, 0));
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m1));
 	boxes[i].draw();
 	i++;
 
 	set_color(1, 1, 0);
-	glm::mat4 m2 = glm::translate(model, glm::vec3(len, 0, 0));
+	glm::mat4 m2 = glm::translate(model, glm::vec3(len, len, 0));
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m2));
 	boxes[i].draw();
 	i++;
 
 	set_color(0, 0, 1);
-	glm::mat4 m3 = glm::translate(model, glm::vec3(-len, 0, 0));
+	glm::mat4 m3 = glm::translate(model, glm::vec3(-len, len, 0));
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m3));
 	boxes[i].draw();
 	i++;
 
 	set_color(1, 0, 1);
-	glm::mat4 m4 = glm::translate(model, glm::vec3(0, 0, -len));
+	glm::mat4 m4 = glm::translate(model, glm::vec3(0, len, -len));
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m4));
 	boxes[i].draw();
 	i++;
 
 
 	set_color(0, 1, 1);
-	glm::mat4 m5 = glm::translate(model, glm::vec3(0, 0, len));
+	glm::mat4 m5 = glm::translate(model, glm::vec3(0, len, len));
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(m5));
 	boxes[i].draw();
 	i++;
+
+	
 }
 
 void StageBox::update()
 {
-	rot = 0.01f + rot;
+	//rot = 0.01f + rot;
+	if (!bottomCheck)
+	{
+		pos.y -= velocity.y;
+		pos.y = clamp(0, pos.y, 10.f);
+		if (pos.y == 0)
+			bottomCheck = true;
+
+		BOOL up = (GetAsyncKeyState(VK_UP) & 0x8001);
+		BOOL down = (GetAsyncKeyState(VK_DOWN) & 0x8001);
+		BOOL bleft = (GetAsyncKeyState(VK_LEFT) & 0x8001);
+		BOOL bright = (GetAsyncKeyState(VK_RIGHT) & 0x8001);
+
+		if (up)
+			left();
+		if (down)
+			right();
+		if (bleft)
+			backward();
+		if (bright)
+			forward();
+	}
+	else
+	{
+		
+	}
+	
+}
+
+void StageBox::check_bottom()
+{
+	//if()
+}
+
+void StageBox::right()
+{
+	pos.z += len * 2;
+}
+
+void StageBox::left()
+{
+	pos.z -= len * 2;
+}
+
+void StageBox::forward()
+{
+	pos.x += len * 2;
+}
+
+void StageBox::backward()
+{
+	pos.x -= len*2;
 }
 
 
