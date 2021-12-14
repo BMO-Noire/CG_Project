@@ -235,64 +235,63 @@ void Robot::update(glm::vec3 _pos, int* many)
 
 void Robot::CheckCollision(glm::vec3 _pos, int* many)
 {
-	for (int i = 0; i < 9; ++i)
+	if (pos.x >= -1.f && pos.x < 1.f)
 	{
-		if (pos.x >= -3.f && pos.x < -1.f)
+		if (pos.z >= -1.f && pos.z < 1.f)
 		{
-			if (pos.z >= -1.f && pos.z < 1.f)
-			{
-				if (many[i] * 2 > pos.y)
-					collisioncheck = true;
-			}
-			if (pos.z >= -3.f && pos.z < 1.f)
-			{
-				if (many[i] * 2 > pos.y)
-					collisioncheck = true;
-			}
-			if (pos.z >= 1.f && pos.z < 3.f)
-			{
-				if (many[i] * 2 > pos.y)
-					collisioncheck = true;
-			}
+			if (many[4] * 2 > pos.y)
+				collisioncheck = true;
 		}
-		if (pos.x >= -1.f && pos.x < 1.f)
+		if (pos.z >= -3.f && pos.z < -1.f)
 		{
-			if (pos.z + (2 * body_size.z) >= -1.f && pos.z - (2 * body_size.z) < 1.f)
-			{
-				if (many[i] * 2 > pos.y)
-					collisioncheck = true;
-			}
-			if (pos.z >= -3.f && pos.z < 1.f)
-			{
-				if (many[i] * 2 > pos.y)
-					collisioncheck = true;
-			}
-			if (pos.z >= 1.f && pos.z < 3.f)
-			{
-				if (many[i] * 2 > pos.y)
-					collisioncheck = true;
-			}
+			if (many[7] * 2 > pos.y)
+				collisioncheck = true;
 		}
-		if (pos.x >= 1.f && pos.x < 3.f)
+		if (pos.z >= 1.f && pos.z < 3.f)
 		{
-			if (pos.z >= -1.f && pos.z < 1.f)
-			{
-				if (many[i] * 2 > pos.y)
-					collisioncheck = true;
-			}
-			if (pos.z >= -3.f && pos.z < 1.f)
-			{
-				if (many[i] * 2 > pos.y)
-					collisioncheck = true;
-			}
-			if (pos.z >= 1.f && pos.z < 3.f)
-			{
-				if (many[i] * 2 > pos.y)
-					collisioncheck = true;
-			}
+			if (many[1] * 2 > pos.y)
+				collisioncheck = true;
 		}
-
 	}
+	if (pos.x >= -3.f && pos.x < -1.f)
+	{
+		if (pos.z >= -1.f && pos.z < 1.f)
+		{
+			if (many[3] * 2 > pos.y)
+				collisioncheck = true;
+		}
+		if (pos.z >= -3.f && pos.z < -1.f)
+		{
+			if (many[6] * 2 > pos.y)
+				collisioncheck = true;
+		}
+		if (pos.z >= 1.f && pos.z < 3.f)
+		{
+			if (many[0] * 2 > pos.y)
+				collisioncheck = true;
+		}
+	}
+	
+	if (pos.x >= 1.f && pos.x < 3.f)
+	{
+		if (pos.z >= -1.f && pos.z < 1.f)
+		{
+			if (many[5] * 2 > pos.y)
+				collisioncheck = true;
+		}
+		if (pos.z >= -3.f && pos.z < -1.f)
+		{
+			if (many[8] * 2 > pos.y)
+				collisioncheck = true;
+		}
+		if (pos.z >= 1.f && pos.z < 3.f)
+		{
+			if (many[2] * 2 > pos.y)
+				collisioncheck = true;
+		}
+	}
+
+	
 
 }
 
