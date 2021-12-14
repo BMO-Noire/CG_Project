@@ -9,7 +9,7 @@ in vec3 in_Normal; // 노멀 벡터
 uniform mat4 modelTransform; // 변환 메트릭스
 uniform mat4 viewTransform; // view변환 매트릭스
 uniform mat4 projectionTransform;
-uniform vec3 uniform_color; //  색상
+uniform vec4 uniform_color; //  색상
 
 out vec3 frag_pos;
 out vec3 normal;
@@ -20,7 +20,7 @@ void main(void)
 {
 	gl_Position = projectionTransform * viewTransform * modelTransform * vec4(in_Position, 1.0);
 
-	ex_Color = vec4(uniform_color, 1.0);
+	ex_Color = vec4(uniform_color);
 	frag_pos = vec3(modelTransform * vec4(in_Position, 1.0));
 	normal = normalize(frag_pos);
 
