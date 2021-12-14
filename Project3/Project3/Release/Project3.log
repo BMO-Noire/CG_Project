@@ -1,5 +1,93 @@
-﻿  코드를 생성하고 있습니다.
-  Previous IPDB not found, fall back to full compilation.
-  All 209 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+﻿  main.cpp
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\main.cpp(140,23): warning C4305: '초기화 중': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\main.cpp(368,20): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\main.cpp(393,34): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\main.cpp(498,28): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+  pch.cpp
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\pch.cpp(10,27): warning C4244: 'return': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  robot.cpp
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(222,26): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(226,26): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(230,26): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(237,26): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(241,26): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(245,26): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(252,26): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(256,26): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(260,26): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(266,24): warning C4305: '-=': 'double'에서 'T'(으)로 잘립니다.
+          with
+          [
+              T=float
+          ]
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(361,36): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(371,24): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(458,20): warning C4305: '+=': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(463,20): warning C4305: '-=': 'double'에서 'float'(으)로 잘립니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(628,27): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(634,27): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(640,27): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(649,27): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(655,27): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(661,27): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(670,27): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(676,27): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(682,27): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(725,20): warning C4244: '=': 'int'에서 'T'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              T=float
+          ]
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(729,20): warning C4244: '=': 'int'에서 'T'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              T=float
+          ]
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(733,20): warning C4244: '=': 'int'에서 'T'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              T=float
+          ]
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(740,20): warning C4244: '=': 'int'에서 'T'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              T=float
+          ]
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(744,20): warning C4244: '=': 'int'에서 'T'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              T=float
+          ]
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(748,20): warning C4244: '=': 'int'에서 'T'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              T=float
+          ]
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(755,20): warning C4244: '=': 'int'에서 'T'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              T=float
+          ]
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(759,20): warning C4244: '=': 'int'에서 'T'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              T=float
+          ]
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(763,20): warning C4244: '=': 'int'에서 'T'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              T=float
+          ]
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(861,24): warning C4305: '-=': 'double'에서 'T'(으)로 잘립니다.
+          with
+          [
+              T=float
+          ]
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(874,36): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\robot.cpp(884,24): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+  코드를 생성하고 있습니다.
+  39 of 217 functions (18.0%) were compiled, the rest were copied from previous compilation.
+    12 functions were new in current compilation
+    13 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
   Project3.vcxproj -> C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Release\Project3.exe

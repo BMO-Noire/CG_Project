@@ -158,8 +158,6 @@ void key_input(unsigned char key, int x, int y) {
 		break;
 	case 'a':
 		camera_pos.x += 0.5f;
-		//PlaySound(TEXT(SOUND_CUBE), NULL, SND_ASYNC | SND_ALIAS);
-		playingShuffleSound();
 		break;
 	case 'd':
 		camera_pos.x -= 0.5f;
@@ -183,20 +181,28 @@ void key_input(unsigned char key, int x, int y) {
 		camera_spin -= -.1f;
 		break;
 	case 'i':
-		robot->forward();
-
+		if (robot != nullptr)
+		{
+			robot->forward();
+		}
 		break;
 	case 'k':
-		robot->backward();
-
+		if (robot != nullptr)
+		{
+			robot->backward();
+		}
 		break;
 	case 'j':
-		robot->left();
-
+		if (robot != nullptr)
+		{
+			robot->left();
+		}
 		break;
 	case 'l':
-		robot->right();
-
+		if (robot != nullptr)
+		{
+			robot->right();
+		}
 		break;
 	case 'o':
 		robot->jump();
@@ -208,8 +214,8 @@ void key_input(unsigned char key, int x, int y) {
 		camera_pos.z = axis_z;
 		whole_spin_rad = 0.f;
 		camera_spin = 0.f;
-		robot->reset();
-		robot2->reset();
+		vecBoxes.clear();
+		robot = new Robot;
 		break;
 	case 't':
 		for (auto& box : vecBoxes)
@@ -398,14 +404,6 @@ void main(int argc, char** argv) {
 	else
 		std::cout << "GLEW Initialized\n";
 
-	std::cout << "명령어" << std::endl;
-	std::cout << "i/j/k/l 캐릭터 움직임" << std::endl;
-	std::cout << "o 캐릭터 점프" << std::endl;
-	std::cout << "w/a/s/d 카메라이동" << std::endl;
-	std::cout << "y/Y 화면 중점 회전" << std::endl;
-	std::cout << "(추가)u/U 카메라 중점 회전" << std::endl;
-	std::cout << "c 초기화" << std::endl;
-	std::cout << "q 프로그램종료" << std::endl;
 
 	shaderID = complie_shaders(); // 세이더 프로그램
 
@@ -424,7 +422,7 @@ void main(int argc, char** argv) {
 	//camera_pos.z = axis_z;
 	camera_pos.x = axis_x;
 	camera_pos.y = 15.f;
-	camera_pos.z = 45.f;
+	camera_pos.z = 15.f;
 	whole_spin_rad = 0.f;
 
 	glutMouseFunc(m_click);
@@ -449,26 +447,6 @@ void Draw_Axis()
 	float length = 900.f;
 	set_color(1, 0, 0, 1);
 
-
-	//X-axis (red)
-	glBegin(GL_LINES);
-	glVertex3f(-length, 0, 0);
-	glVertex3f(length, 0, 0);
-	glEnd();
-
-	set_color(0, 1, 0, 1);
-	//Y-axis (green)
-	glBegin(GL_LINES);
-	glVertex3f(0, -length, 0);
-	glVertex3f(0, length, 0);
-	glEnd();
-
-	//Z-axis (blue)
-	set_color(0, 0, 1, 1);
-	glBegin(GL_LINES);
-	glVertex3f(0, 0, -length);
-	glVertex3f(0, 0, length);
-	glEnd();
 }
 
 GLvoid drawScene() {
@@ -483,7 +461,7 @@ GLvoid Reshape(int w, int h)
 void draw() {
 	glUseProgram(shaderID);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_DEPTH_TEST);
-	glClearColor(0.f, 0.f, 0.f, 0.f);
+	glClearColor(0.5f, 0.5f, 0.5f, 0.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 

@@ -260,13 +260,13 @@ void Robot::update(glm::vec3 _pos, int* many)
 			pos.y = clamp(many[2] * 2, pos.y, 50.f);
 		}
 	}
-	pos.x = clamp(-10.f + body_size.x, pos.x, 10.f - body_size.x);
+	pos.x = clamp(-2.5f + body_size.x, pos.x, 2.5f - body_size.x);
 	
-	pos.z = clamp(body_size.z - 10.f, pos.z, 10.f - body_size.z);
+	pos.z = clamp(body_size.z - 2.5f, pos.z, 2.5f - body_size.z);
 	velocity.y -= 0.000098;
 	velocity.x = velocity.x;
 	velocity.z = velocity.z;
-
+	
 	CheckCollision(_pos, many);
 	if (collisioncheck)
 	{
@@ -351,8 +351,6 @@ void Robot::CheckCollision(glm::vec3 _pos, int* many)
 				collisioncheck = false;
 		}
 	}
-
-
 
 }
 
@@ -541,7 +539,7 @@ StageBox::StageBox()
 	len = 1.f;
 	alpha = 1.f;
 	pos.y = 10.f;
-	velocity.y = 0.001f;
+	velocity.y = 0.005f;
 
 	boxes[0].set_size(len, 0.01f, len);
 	boxes[1].set_size(len, 0.01f, len);
