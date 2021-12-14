@@ -42,7 +42,7 @@ char* filetobuf(const char* file)
 
 GLuint complie_shaders()
 {
-	GLchar* vertexsource, *fragmentsource;
+	GLchar* vertexsource, * fragmentsource;
 
 	//--- 버텍스 세이더 읽어 저장하고 컴파일 하기
 	vertexsource = filetobuf("vertex.glsl");
@@ -107,9 +107,9 @@ std::vector<StageBox*> vecBoxes;
 Robot* robot;
 Robot2* robot2;
 Stage* stage;
-//StageBox* stagebox;
+StageBox* shadowbox;
 
-int howmany[9]{};
+
 int mouse_prev_x = 0, mouse_prev_y = 0;
 int mouse_dx = 0, mouse_dy = 0;
 
@@ -214,7 +214,7 @@ void key_input(unsigned char key, int x, int y) {
 	case 't':
 		for (auto& box : vecBoxes)
 		{
-			if(!box->GetBottomCheck())
+			if (!box->GetBottomCheck())
 				box->left();
 		}
 		break;
@@ -241,10 +241,7 @@ void key_input(unsigned char key, int x, int y) {
 		break;
 	}
 
-	
 
-	
-	
 }
 
 
@@ -275,6 +272,8 @@ void timer(int value) {
 
 	bool checkAllBox = false;
 
+	int howmany[9]{};
+
 	for (auto& box : vecBoxes)
 	{
 		checkAllBox = box->GetBottomCheck();
@@ -282,22 +281,104 @@ void timer(int value) {
 	if (vecBoxes.size() == 0)
 		checkAllBox = true;
 
+
+	stage->update();
+
+	robot2->update();
+
+
+	for (auto& box : vecBoxes)
+	{
+		box->update(howmany);
+
+		if (box->GetBottomCheck())
+		{
+			glm::vec3 vpos{};
+			vpos = box->GetPos();
+
+			if (vpos.x == 0.f)
+			{
+				if (vpos.z == 0.f)
+				{
+					howmany[4] += 1;
+				}
+				else if (vpos.z == -2.f)
+				{
+					howmany[7] += 1;
+				}
+				else if (vpos.z == 2.f)
+				{
+					howmany[1] += 1;
+				}
+			}
+			else if (vpos.x == -2.f)
+			{
+				if (vpos.z == 0.f)
+				{
+					howmany[3] += 1;
+				}
+				else if (vpos.z == -2.f)
+				{
+					howmany[6] += 1;
+				}
+				else if (vpos.z == 2.f)
+				{
+					howmany[0] += 1;
+				}
+			}
+			else if (vpos.x == 2.f)
+			{
+				if (vpos.z == 0.f)
+				{
+					howmany[5] += 1;
+				}
+				else if (vpos.z == -2.f)
+				{
+					howmany[8] += 1;
+				}
+				else if (vpos.z == 2.f)
+				{
+					howmany[2] += 1;
+				}
+			}
+		}
+		else
+		{
+			if (robot != nullptr)
+				robot->update(box->GetPos(), howmany);
+			shadowbox->SetPos(box->GetPos(), howmany);
+		}
+	}
+
+
 	if (checkAllBox)
 	{
 		StageBox* stagebox = new StageBox;
+		float min = -100;
+
+		for (int i = 0; i < 9; ++i)
+		{
+			if (howmany[i] > min)
+				min = howmany[i];
+		}
+		stagebox->SetPos(glm::vec3(0.f, 10.f + (min * 2.f), 0.f));
+
 		vecBoxes.emplace_back(stagebox);
 	}
-	
 
-	stage->update();
-	robot->update();
-	robot2->update();
-	for (auto& box : vecBoxes)
+	if (robot != nullptr)
 	{
-		box->update();
+		if (robot->GetDeadCheck())
+		{
+			delete robot;
+			robot = nullptr;
+		}
 	}
-	
+
+
 	draw();
+
+
 	glutTimerFunc(1, timer, value);
 }
 
@@ -317,7 +398,7 @@ void main(int argc, char** argv) {
 	else
 		std::cout << "GLEW Initialized\n";
 
-	std::cout<<"명령어" << std::endl;
+	std::cout << "명령어" << std::endl;
 	std::cout << "i/j/k/l 캐릭터 움직임" << std::endl;
 	std::cout << "o 캐릭터 점프" << std::endl;
 	std::cout << "w/a/s/d 카메라이동" << std::endl;
@@ -328,14 +409,16 @@ void main(int argc, char** argv) {
 
 	shaderID = complie_shaders(); // 세이더 프로그램
 
+
 	playingBgm();
 	//PlaySound(TEXT(SOUND_BGM), NULL, SND_ASYNC | SND_LOOP);
-	
+
 	stage = new Stage;
 	//stagebox = new StageBox;
 	robot = new Robot;
 	robot2 = new Robot2;
-
+	shadowbox = new StageBox;
+	shadowbox->SetAlpha(0.5f);
 	//camera_pos.x = axis_x;
 	//camera_pos.y = axis_y;
 	//camera_pos.z = axis_z;
@@ -343,7 +426,7 @@ void main(int argc, char** argv) {
 	camera_pos.y = 15.f;
 	camera_pos.z = 45.f;
 	whole_spin_rad = 0.f;
-		
+
 	glutMouseFunc(m_click);
 	glutKeyboardFunc(key_input);
 	glutDisplayFunc(drawScene);
@@ -355,15 +438,16 @@ void main(int argc, char** argv) {
 	glutMainLoop();
 }
 
-void set_color(float r, float g, float b) {
+void set_color(float r, float g, float b, float a) {
 	unsigned int color_location = glGetUniformLocation(shaderID, "uniform_color");
-	glUniform3f(color_location, r, g, b);
+	glUniform4f(color_location, r, g, b, a);
+	//glColor4f
 }
 
 void Draw_Axis()
 {
 	float length = 900.f;
-	set_color(1, 0, 0);
+	set_color(1, 0, 0, 1);
 
 
 	//X-axis (red)
@@ -372,7 +456,7 @@ void Draw_Axis()
 	glVertex3f(length, 0, 0);
 	glEnd();
 
-	set_color(0, 1, 0);
+	set_color(0, 1, 0, 1);
 	//Y-axis (green)
 	glBegin(GL_LINES);
 	glVertex3f(0, -length, 0);
@@ -380,7 +464,7 @@ void Draw_Axis()
 	glEnd();
 
 	//Z-axis (blue)
-	set_color(0, 0, 1);
+	set_color(0, 0, 1, 1);
 	glBegin(GL_LINES);
 	glVertex3f(0, 0, -length);
 	glVertex3f(0, 0, length);
@@ -402,7 +486,9 @@ void draw() {
 	glClearColor(0.f, 0.f, 0.f, 0.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-	
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glm::vec3 cameraPos = glm::rotate(glm::mat4(1.0f), whole_spin_rad, glm::vec3(0, 1, 0)) * glm::vec4(camera_pos, 1.f);
 	glm::vec3 cameraDirection = glm::vec3(-cameraPos.x, -cameraPos.y, -cameraPos.z);
@@ -425,21 +511,25 @@ void draw() {
 	glm::mat4 model = glm::mat4(1.0f); // 초기화
 	glUniformMatrix4fv(axis_location, 1, GL_FALSE, glm::value_ptr(model));
 	Draw_Axis();
-	
+
 	unsigned int modelLocation = glGetUniformLocation(shaderID, "modelTransform");
 	model = glm::translate(model, glm::vec3(0, 0, 0));
 	model = glm::rotate(model, .0f, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model)); //--- modelTransform 변수에 변환 값 적용하기
-	
-	set_color(0.5, 0.4, 0.1);
+
+	set_color(0.5, 0.4, 0.1, 1);
 	stage->draw(shaderID, model);
-	robot->draw(shaderID, model);
+	if (robot != nullptr)
+		robot->draw(shaderID, model);
 	//tetris->draw();
 	//robot2->draw(shaderID, model);
+	shadowbox->draw(shaderID, model);
+
 	for (auto& box : vecBoxes)
 	{
 		box->draw(shaderID, model);
 	}
+
 	// 조명
 	glUseProgram(shaderID);
 	int lightPosLocation = glGetUniformLocation(shaderID, "lightPos");
@@ -454,6 +544,7 @@ void draw() {
 
 	int camera_pos_Location = glGetUniformLocation(shaderID, "view_pos");
 	glUniform3f(camera_pos_Location, cameraPos.x, cameraPos.y, cameraPos.z);
+
 
 	unsigned int color_location = glGetUniformLocation(shaderID, "uniform_color");
 	glUniform3f(color_location, 0.5f, 0.1f, 0.1f);

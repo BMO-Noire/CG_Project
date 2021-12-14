@@ -13,6 +13,7 @@ uniform vec3 uniform_color; //  색상
 
 out vec3 frag_pos;
 out vec3 normal;
+
 out vec4 ex_Color; // 프래그먼트 세이더에게 전달
 
 void main(void)
@@ -22,4 +23,5 @@ void main(void)
 	ex_Color = vec4(uniform_color, 1.0);
 	frag_pos = vec3(modelTransform * vec4(in_Position, 1.0));
 	normal = normalize(frag_pos);
+
 }

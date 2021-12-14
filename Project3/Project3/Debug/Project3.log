@@ -3,3 +3,4 @@ C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\main.cpp(140,23): w
 C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\main.cpp(306,34): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
 C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Project3\main.cpp(434,25): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
   Project3.vcxproj -> C:\Users\anji0\Documents\GitHub\CG_Project\Project3\Debug\Project3.exe
+
