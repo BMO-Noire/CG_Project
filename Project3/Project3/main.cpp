@@ -1,4 +1,9 @@
 ﻿#pragma warning(disable : 4996)
+#pragma comment(lib, "winmm.lib")
+
+#define SOUND_BGM		L"bgm.wav"
+#define SOUND_JUMP		"jump.wav"
+#define SOUND_CUBE		L"cube.wav"
 
 #include "pch.h"
 #include <random>
@@ -6,7 +11,17 @@
 #include <stdio.h>
 #include <corecrt_wtime.h>
 #include "robot.h"
+#include <mmsystem.h>
+#include <Digitalv.h>
+MCI_OPEN_PARMS openBgm;
+MCI_PLAY_PARMS playBgm;
+MCI_OPEN_PARMS openShuffleSound;
+MCI_PLAY_PARMS playShuffleSound;
 
+void playingBgm(void);
+void playingShuffleSound(void);
+int dwID;
+bool play= true;
 char* filetobuf(const char* file)
 {
 	FILE* fptr;
@@ -130,6 +145,12 @@ float axis_x = 0.f, axis_y = 5.0f, axis_z = 15.0f;
 
 bool r_onoff = false;
 
+//조명
+float light_spin = 0;
+float light_power = 0.1f;
+glm::vec3 light_pos = glm::vec3(0, 20, 0);
+glm::vec3 light_color = glm::vec3(1, 1, 1);
+
 void key_input(unsigned char key, int x, int y) {
 	switch (key) {
 	case 'q':
@@ -137,6 +158,8 @@ void key_input(unsigned char key, int x, int y) {
 		break;
 	case 'a':
 		camera_pos.x += 0.5f;
+		//PlaySound(TEXT(SOUND_CUBE), NULL, SND_ASYNC | SND_ALIAS);
+		playingShuffleSound();
 		break;
 	case 'd':
 		camera_pos.x -= 0.5f;
@@ -161,23 +184,23 @@ void key_input(unsigned char key, int x, int y) {
 		break;
 	case 'i':
 		robot->forward();
-		robot2->forward();
+
 		break;
 	case 'k':
 		robot->backward();
-		robot2->backward();
+
 		break;
 	case 'j':
 		robot->left();
-		robot2->left();
+
 		break;
 	case 'l':
 		robot->right();
-		robot2->right();
+
 		break;
 	case 'o':
 		robot->jump();
-		robot2->jump();
+		PlaySound(TEXT(SOUND_JUMP), NULL, SND_ASYNC | SND_ALIAS);
 		break;
 	case 'c':
 		camera_pos.x = axis_x;
@@ -305,6 +328,8 @@ void main(int argc, char** argv) {
 
 	shaderID = complie_shaders(); // 세이더 프로그램
 
+	playingBgm();
+	//PlaySound(TEXT(SOUND_BGM), NULL, SND_ASYNC | SND_LOOP);
 	
 	stage = new Stage;
 	//stagebox = new StageBox;
@@ -415,11 +440,51 @@ void draw() {
 	{
 		box->draw(shaderID, model);
 	}
-	
+	// 조명
+	glUseProgram(shaderID);
+	int lightPosLocation = glGetUniformLocation(shaderID, "lightPos");
+	glm::vec3 temp_light_pos = glm::rotate(glm::mat4(1.f), light_spin, glm::vec3(0, 1, 0)) * glm::vec4(light_pos, 1.f);
+	glUniform3fv(lightPosLocation, 1, glm::value_ptr(temp_light_pos));
+
+	int lightColorLocation = glGetUniformLocation(shaderID, "lightColor");
+	glUniform3fv(lightColorLocation, 1, glm::value_ptr(light_color));
+
+	int lightPowerLocation = glGetUniformLocation(shaderID, "ambientLight");
+	glUniform1f(lightPowerLocation, light_power);
+
+	int camera_pos_Location = glGetUniformLocation(shaderID, "view_pos");
+	glUniform3f(camera_pos_Location, cameraPos.x, cameraPos.y, cameraPos.z);
 
 	unsigned int color_location = glGetUniformLocation(shaderID, "uniform_color");
 	glUniform3f(color_location, 0.5f, 0.1f, 0.1f);
 
 
 	glutSwapBuffers();
+}
+
+
+void playingBgm(void) {
+	openBgm.lpstrElementName = SOUND_BGM; //파일 오픈
+	openBgm.lpstrDeviceType = L"mpegvideo"; //mp3 형식
+	mciSendCommand(0, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (DWORD)(LPVOID)&openBgm);
+	dwID = openBgm.wDeviceID;
+	mciSendCommand(dwID, MCI_PLAY, MCI_DGV_PLAY_REPEAT, (DWORD)(LPVOID)&openBgm); //음악 반복 재생
+}
+void playingShuffleSound(void) {
+	openShuffleSound.lpstrElementName = SOUND_CUBE; //파일 오픈
+	openShuffleSound.lpstrDeviceType = L"mpegvideo"; //mp3 형식
+	mciSendCommand(0, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (DWORD)(LPVOID)&openShuffleSound);
+	dwID = openShuffleSound.wDeviceID;
+
+	if(play)
+	{
+		mciSendCommand(dwID, MCI_PLAY, MCI_NOTIFY, (DWORD)(LPVOID)&openShuffleSound); //음악을 한 번 재생
+		play = false;
+	}
+	else
+	{
+		mciSendCommand(dwID, MCI_SEEK, MCI_SEEK_TO_START, (DWORD)(LPVOID)NULL); //음원 재생 위치를 처음으로 초기화
+		play = true;
+	}
+
 }
