@@ -215,9 +215,53 @@ void Robot::update(glm::vec3 _pos, int* many)
 
 
 	pos += velocity;
-
+	if (pos.x >= -1.f && pos.x < 1.f)
+	{
+		if (pos.z >= -1.f && pos.z < 1.f)
+		{
+			pos.y = clamp(many[4] * 2, pos.y, 50.f);
+		}
+		if (pos.z >= -3.f && pos.z < -1.f)
+		{
+			pos.y = clamp(many[7] * 2, pos.y, 50.f);
+		}
+		if (pos.z >= 1.f && pos.z < 3.f)
+		{
+			pos.y = clamp(many[1] * 2, pos.y, 50.f);
+		}
+	}
+	if (pos.x >= -3.f && pos.x < -1.f)
+	{
+		if (pos.z >= -1.f && pos.z < 1.f)
+		{
+			pos.y = clamp(many[3] * 2, pos.y, 50.f);
+		}
+		if (pos.z >= -3.f && pos.z < -1.f)
+		{
+			pos.y = clamp(many[6] * 2, pos.y, 50.f);
+		}
+		if (pos.z >= 1.f && pos.z < 3.f)
+		{
+			pos.y = clamp(many[0] * 2, pos.y, 50.f);
+		}
+	}
+	if (pos.x >= 1.f && pos.x < 3.f)
+	{
+		if (pos.z >= -1.f && pos.z < 1.f)
+		{
+			pos.y = clamp(many[5] * 2, pos.y, 50.f);
+		}
+		if (pos.z >= -3.f && pos.z < -1.f)
+		{
+			pos.y = clamp(many[8] * 2, pos.y, 50.f);
+		}
+		if (pos.z >= 1.f && pos.z < 3.f)
+		{
+			pos.y = clamp(many[2] * 2, pos.y, 50.f);
+		}
+	}
 	pos.x = clamp(-10.f + body_size.x, pos.x, 10.f - body_size.x);
-	pos.y = clamp(0, pos.y, 50.f);
+	
 	pos.z = clamp(body_size.z - 10.f, pos.z, 10.f - body_size.z);
 	velocity.y -= 0.000098;
 	velocity.x = velocity.x;
@@ -241,16 +285,22 @@ void Robot::CheckCollision(glm::vec3 _pos, int* many)
 		{
 			if (many[4] * 2 > pos.y)
 				collisioncheck = true;
+			if (many[4] * 2 <= pos.y)
+				collisioncheck = false;
 		}
 		if (pos.z >= -3.f && pos.z < -1.f)
 		{
 			if (many[7] * 2 > pos.y)
 				collisioncheck = true;
+			if (many[7] * 2 <= pos.y)
+				collisioncheck = false;
 		}
 		if (pos.z >= 1.f && pos.z < 3.f)
 		{
 			if (many[1] * 2 > pos.y)
 				collisioncheck = true;
+			if (many[1] * 2 <= pos.y)
+				collisioncheck = false;
 		}
 	}
 	if (pos.x >= -3.f && pos.x < -1.f)
@@ -259,39 +309,50 @@ void Robot::CheckCollision(glm::vec3 _pos, int* many)
 		{
 			if (many[3] * 2 > pos.y)
 				collisioncheck = true;
+			if (many[3] * 2 <= pos.y)
+				collisioncheck = false;
 		}
 		if (pos.z >= -3.f && pos.z < -1.f)
 		{
 			if (many[6] * 2 > pos.y)
 				collisioncheck = true;
+			if (many[6] * 2 <= pos.y)
+				collisioncheck = false;
 		}
 		if (pos.z >= 1.f && pos.z < 3.f)
 		{
 			if (many[0] * 2 > pos.y)
 				collisioncheck = true;
+			if (many[0] * 2 <= pos.y)
+				collisioncheck = false;
 		}
 	}
-	
 	if (pos.x >= 1.f && pos.x < 3.f)
 	{
 		if (pos.z >= -1.f && pos.z < 1.f)
 		{
 			if (many[5] * 2 > pos.y)
 				collisioncheck = true;
+			if (many[5] * 2 <= pos.y)
+				collisioncheck = false;
 		}
 		if (pos.z >= -3.f && pos.z < -1.f)
 		{
 			if (many[8] * 2 > pos.y)
 				collisioncheck = true;
+			if (many[8] * 2 <= pos.y)
+				collisioncheck = false;
 		}
 		if (pos.z >= 1.f && pos.z < 3.f)
 		{
 			if (many[2] * 2 > pos.y)
 				collisioncheck = true;
+			if (many[2] * 2 <= pos.y)
+				collisioncheck = false;
 		}
 	}
 
-	
+
 
 }
 
@@ -480,7 +541,7 @@ StageBox::StageBox()
 	len = 1.f;
 	alpha = 1.f;
 	pos.y = 10.f;
-	velocity.y = 0.01f;
+	velocity.y = 0.001f;
 
 	boxes[0].set_size(len, 0.01f, len);
 	boxes[1].set_size(len, 0.01f, len);
